@@ -19,14 +19,26 @@ describe "RunJobCommand" do
     expect(out.match(/^Invalid command given.$/)).to be_true
   end
 
-  it "should raise an error when an invalid monitrc given" do
-    out = %x[./bin/run-job -m ./not/exist/monitrc start 2>&1]
+  it "should raise an error when the job name not given" do
+    out = %x[./bin/run-job -m ./spec/assets/monitrc start 2>&1]
     expect($?.exitstatus).to eq(1)
-    expect(out.match(/^Monitrc file not found at .\/not\/exist\/monitrc$/)).to be_true
+    expect(out.match(/^Job name not given.$/)).to be_true
+  end
+
+  it "should raise an error when an invalid job name given" do
+    out = %x[./bin/run-job -m ./spec/assets/monitrc start not-exist-job-name 2>&1]
+    expect($?.exitstatus).to eq(1)
+    expect(out.match(/^Monitrc file not found at .\/spec\/assets\/monitrc\/not-exist-job-name$/)).to be_true
+  end
+
+  it "should raise an error when an invalid monitrc directory given" do
+    out = %x[./bin/run-job -m ./not/exist/monitrc start miku 2>&1]
+    expect($?.exitstatus).to eq(1)
+    expect(out.match(/^Monitrc file not found at .\/not\/exist\/monitrc\/miku$/)).to be_true
   end
 
   it "should start/stop processes" do
-    out = %x[./bin/run-job -m ./spec/assets/monitrc start 2>&1]
+    out = %x[./bin/run-job -m ./spec/assets/monitrc start miku 2>&1]
     expect($?.exitstatus).to eq(0)
     expect(out).to eq("android: \e[32mRUNNING\e[0m\nangel: \e[32mRUNNING\e[0m\nnendoroid: \e[32mRUNNING\e[0m\n")
     pids = []
@@ -37,7 +49,7 @@ describe "RunJobCommand" do
       pids << pid
     end
 
-    out = %x[./bin/run-job -m ./spec/assets/monitrc stop 2>&1]
+    out = %x[./bin/run-job -m ./spec/assets/monitrc stop miku 2>&1]
     expect(out).to eq("android: \e[31mSTOPPED\e[0m\nnendoroid: \e[31mSTOPPED\e[0m\nangel: \e[31mSTOPPED\e[0m\n")
     expect($?.exitstatus).to eq(0)
     pid_files.each do |pid_file|
@@ -49,19 +61,19 @@ describe "RunJobCommand" do
   end
 
   it "should get the status of the running processes" do
-    out = %x[./bin/run-job -m ./spec/assets/monitrc status 2>&1]
+    out = %x[./bin/run-job -m ./spec/assets/monitrc status miku 2>&1]
     expect($?.exitstatus).to eq(0)
     expect(out).to eq("android: \e[31mSTOPPED\e[0m\nnendoroid: \e[31mSTOPPED\e[0m\nangel: \e[31mSTOPPED\e[0m\n")
 
-    out = %x[./bin/run-job -m ./spec/assets/monitrc start 2>&1]
-    out = %x[./bin/run-job -m ./spec/assets/monitrc status 2>&1]
+    out = %x[./bin/run-job -m ./spec/assets/monitrc start miku 2>&1]
+    out = %x[./bin/run-job -m ./spec/assets/monitrc status miku 2>&1]
     expect($?.exitstatus).to eq(0)
     expect(out).to eq("android: \e[32mRUNNING\e[0m\nnendoroid: \e[32mRUNNING\e[0m\nangel: \e[32mRUNNING\e[0m\n")
-    out = %x[./bin/run-job -m ./spec/assets/monitrc stop]
+    out = %x[./bin/run-job -m ./spec/assets/monitrc stop miku]
   end
 
   it "should cancel launching depending processes when depended process has failed starting" do
-    out = %x[./bin/run-job -m ./spec/assets/monitrc_fail start]
+    out = %x[./bin/run-job -m ./spec/assets/monitrc_fail start rin]
     expect($?.exitstatus).to eq(1)
     expect(out).to eq("angel: \e[31mFAILD\e[0m\nnendoroid: \e[31mFAILD\e[0m\n")
   end
