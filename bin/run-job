@@ -21,7 +21,7 @@ if ARGV[0].nil? || ![:start, :stop, :status].include?(ARGV[0].to_sym)
 end
 
 
-if ARGV[1].nil? || !File.file?(File.join(config[:monitrc], ARGV[1]))
+if ARGV[1].nil?
   $stderr.puts("Invalid Job name given.")
   $stderr.puts(opt.help)
   exit(1)

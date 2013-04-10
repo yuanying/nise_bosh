@@ -28,10 +28,10 @@ describe "RunJobCommand" do
   it "should raise an error when an invalid job name not given" do
     out = %x[./bin/run-job -m ./spec/assets/monitrc start not-exist-job-name 2>&1]
     expect($?.exitstatus).to eq(1)
-    expect(out.match(/^Invalid Job name given.$/)).to be_true
+    expect(out.match(/^Monitrc file not found at .\/spec\/assets\/monitrc\/not-exist-job-name$/)).to be_true
   end
 
-  it "should raise an error when an invalid monitrc given" do
+  it "should raise an error when an invalid monitrc directory given" do
     out = %x[./bin/run-job -m ./not/exist/monitrc start miku 2>&1]
     expect($?.exitstatus).to eq(1)
     expect(out.match(/^Monitrc file not found at .\/not\/exist\/monitrc\/miku$/)).to be_true
