@@ -216,7 +216,7 @@ class NiseBosh
     spec["templates"].each_pair do |template, to|
       write_template(spec, File.join(template_base, template), File.join(install_base, to))
     end
-    write_template(spec, File.join(@options[:repo_dir], "jobs", job, "monit"), File.join(@options[:install_dir], "bosh", "etc", "monitrc"))
+    write_template(spec, File.join(@options[:repo_dir], "jobs", job, "monit"), File.join(@options[:install_dir], "bosh", "etc", "monitrc", job))
   end
 
   def job_packages(job)
