@@ -32,7 +32,7 @@ describe "RunJobCommand" do
   end
 
   it "should raise an error when an invalid monitrc given" do
-    out = %x[./bin/run-job -m ./not/exist/monitrc start 2>&1]
+    out = %x[./bin/run-job -m ./not/exist/monitrc start miku 2>&1]
     expect($?.exitstatus).to eq(1)
     expect(out.match(/^Monitrc file not found at .\/not\/exist\/monitrc$/)).to be_true
   end
