@@ -7,7 +7,7 @@ config = {
 }
 
 opt = OptionParser.new
-opt.on('-m MONITRC', 'Path to the monitrc file (default: #{config[:monitrc]})') {|v| config[:monitrc] = v }
+opt.on('-m MONITRC_DIR', 'Path to the monitrc directory (default: #{config[:monitrc]})') {|v| config[:monitrc] = v }
 opt.on('-t TIMEOUT', 'Seconds to timeout (default: #{config[:timeout]})') {|v| config[:timeout] = v }
 opt.banner = <<EOF
 Usage: job-ctl [OPTION]... (start|stop|status)
@@ -20,17 +20,25 @@ if ARGV[0].nil? || ![:start, :stop, :status].include?(ARGV[0].to_sym)
   exit(1)
 end
 
-run_mode = ARGV[0].to_sym
 
-unless File.exists?(config[:monitrc])
-  $stderr.puts("Monitrc file not found at #{config[:monitrc]}")
+if ARGV[1].nil? || !File.file?(File.join(config[:monitrc], ARGV[1]))
+  $stderr.puts("Invalid Job name given.")
+  $stderr.puts(opt.help)
+  exit(1)
+end
+
+run_mode = ARGV[0].to_sym
+monitrc  = File.join(config[:monitrc], ARGV[1])
+
+unless File.exists?(monitrc)
+  $stderr.puts("Monitrc file not found at #{monitrc}")
   exit(1)
 end
 
 daemons = {}
 current = nil
 depended_by = {}
-File.read(config[:monitrc]).split("\n").each do |line|
+File.read(monitrc).split("\n").each do |line|
   if m = line.match(/^check\s+process\s+([^ ]*)(?: with pidfile "?(.*?)"?)?$/i)
     current = m[1].strip
     daemons[current] = {
