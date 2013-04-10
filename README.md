@@ -103,12 +103,12 @@ Some packages require `/var/vcap/stemcell_base.tar.gz` file to create Warden con
 
 Once instllation is complete, you can launch job processes by `run-job` command.
 
-    ./bin/run-job start
+    ./bin/run-job start <job_name>
 
 This command automatically loads the monitrc file (default in: /var/vcap/bosh/etc/monitrc) and start all the processes defined in it. You can also invoke stop and status commands by giving an option.
 
-    ./bin/run-job status
-    ./bin/run-job stop
+    ./bin/run-job status <job_name>
+    ./bin/run-job stop <job_name>
 
 ## Command line options
 
