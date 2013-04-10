@@ -186,10 +186,10 @@ describe NiseBosh do
   end
 
   describe "#install_job" do
-    def check_templates
+    def check_templates job
       expect_contents(@options[:install_dir], "jobs", "angel", "config", "miku.conf")
         .to eq("tenshi\n0\n#{@current_ip}\n")
-      expect_contents(@options[:install_dir], "bosh", "etc", "monitrc")
+      expect_contents(@options[:install_dir], "bosh", "etc", "monitrc", job)
         .to eq("monit\n")
       expect_directory_exists(@options[:install_dir], "data", "packages").to be_true
     end
@@ -198,14 +198,14 @@ describe NiseBosh do
       @nb.install_job("angel")
       expect_contents(@options[:install_dir], "packages", "miku", "dayo").to eq("miku 39\n")
       expect_contents(@options[:install_dir], "packages", "luca", "dayo").to eq("tenshi\n")
-      check_templates
+      check_templates "angel"
     end
 
     it "should not install packags and only generate required files from template files when template_only given" do
       @nb.install_job("angel", true)
       expect_file_exists(@options[:install_dir], "packages", "miku", "dayo").to be_false
       expect_file_exists(@options[:install_dir], "packages", "luca", "dayo").to be_false
-      check_templates
+      check_templates "angel"
     end
   end
 
