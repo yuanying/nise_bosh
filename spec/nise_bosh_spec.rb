@@ -214,7 +214,7 @@ describe NiseBosh do
     end
   end
 
-  descrive "#run_post_install_hook" do
+  describe "#run_post_install_hook" do
     let(:post_install_hook_path) { File.join(@options[:install_dir], "jobs", "miku", "bin", "post_install") }
     
     after do
