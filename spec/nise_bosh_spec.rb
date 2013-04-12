@@ -216,19 +216,23 @@ describe NiseBosh do
 
   describe "#run_post_install_hook" do
     let(:post_install_hook_path) { File.join(@options[:install_dir], "jobs", "miku", "bin", "post_install") }
+
+    before do
+      if defined?(post_install)
+        FileUtils.mkdir_p(File.dirname(post_install_hook_path))
+        open(post_install_hook_path, "w") do |io|
+          io.write post_install
+        end
+        File.chmod(0755, post_install_hook_path)
+      end
+    end
     
     after do
       File.delete(post_install_hook_path) if File.exist?(post_install_hook_path)
     end
 
     context "when bin/post_install file exist" do
-      before do
-        FileUtils.mkdir_p(File.dirname(post_install_hook_path))
-        open(post_install_hook_path, "w") do |io|
-          io.write "#!/bin/sh\necho ha ore no yome"
-        end
-        File.chmod(0755, post_install_hook_path)
-      end
+      let(:post_install) { "#!/bin/sh\necho ha ore no yome" }
 
       it "should run post install hook" do
         expect(File.executable?(post_install_hook_path)).to be_true
@@ -244,13 +248,7 @@ describe NiseBosh do
     end
 
     context "when post_install file exit with error" do
-      before do
-        FileUtils.mkdir_p(File.dirname(post_install_hook_path))
-        open(post_install_hook_path, "w") do |io|
-          io.write "#!/bin/sh\nexit 1"
-        end
-        File.chmod(0755, post_install_hook_path)
-      end
+      let(:post_install) { "#!/bin/sh\nexit 1" }
 
       it "should raise an error" do
         expect(File.executable?(post_install_hook_path)).to be_true
