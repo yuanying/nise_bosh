@@ -209,7 +209,7 @@ describe NiseBosh do
     end
 
     it "should runs post install hook" do
-      expect(@nb.should).to receive(:run_post_install_hook).with("angel")
+      @nb.should_receive(:run_post_install_hook).with("angel")
       @nb.install_job("angel", true)
     end
   end
@@ -223,6 +223,7 @@ describe NiseBosh do
 
     context "when bin/post_install file exist" do
       before do
+        FileUtils.mkdir_p(File.dirname(post_install_hook_path))
         open(post_install_hook_path, "w") do |io|
           io.write "#!/bin/sh\necho ha ore no yome"
         end
