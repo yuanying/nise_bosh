@@ -232,7 +232,7 @@ describe NiseBosh do
 
       it "should run post install hook" do
         expect(File.executable?(post_install_hook_path)).to be_true
-        expect(@nb.run_post_install_hook("miku")).to be "ha ore no yome"
+        expect(@nb.run_post_install_hook("miku")).to eq("ha ore no yome\n")
       end
     end
 

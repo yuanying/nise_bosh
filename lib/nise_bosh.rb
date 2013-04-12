@@ -215,16 +215,53 @@ class NiseBosh
       install_packages(job_packages(job))
     end
     install_job_templates(job)
+    run_post_install_hook(job)
+  end
+
+  def install_base(job)
+    File.join(@options[:install_dir], "jobs", job)
   end
 
   def install_job_templates(job)
     spec = job_spec(job)
     template_base = File.join(@options[:repo_dir], "jobs", job, "templates")
-    install_base = File.join(@options[:install_dir], "jobs", job)
     spec["templates"].each_pair do |template, to|
-      write_template(spec, File.join(template_base, template), File.join(install_base, to))
+      write_template(spec, File.join(template_base, template), File.join(install_base(job), to))
     end
     write_template(spec, File.join(@options[:repo_dir], "jobs", job, "monit"), File.join(@options[:install_dir], "bosh", "etc", "monitrc"))
+  end
+
+  def run_post_install_hook(job)
+    hook_file = File.join(install_base(job), "bin", "post_install")
+
+    return nil unless File.executable?(hook_file)
+
+    env = {
+      'PATH' => '/usr/sbin:/usr/bin:/sbin:/bin',
+    }
+
+
+    stdout_rd, stdout_wr = IO.pipe
+    stderr_rd, stderr_wr = IO.pipe
+    Process.spawn(env, hook_file, :out => stdout_wr, :err => stderr_wr, :unsetenv_others => true)
+    Process.wait
+    exit_status = $?.exitstatus
+    stdout_wr.close
+    stderr_wr.close
+    result = stdout_rd.read
+    error_output = stderr_rd.read
+
+    @log.info("Post install hook for job #{job}: #{result}")
+
+    unless exit_status == 0
+      exception_message = "Hook #{hook} for #{job} failed "
+      exception_message += "(exit: #{exit_status}) "
+      exception_message += " stderr: #{error_output}, stdout: #{result}"
+      @log.info(exception_message)
+
+      raise exception_message
+    end
+    result
   end
 
   def job_packages(job)
