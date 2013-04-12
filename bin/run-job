@@ -1,4 +1,10 @@
 #!/usr/bin/env ruby
+
+if RUBY_VERSION < '1.9.0'
+  $stderr.puts("Ruby 1.9.0 or higher is required. Your Ruby version is #{RUBY_VERSION}")
+  exit(1)
+end
+
 require 'optparse'
 
 config = {
@@ -20,9 +26,8 @@ if ARGV[0].nil? || ![:start, :stop, :status].include?(ARGV[0].to_sym)
   exit(1)
 end
 
-
 if ARGV[1].nil?
-  $stderr.puts("Invalid Job name given.")
+  $stderr.puts("Job name not given.")
   $stderr.puts(opt.help)
   exit(1)
 end
