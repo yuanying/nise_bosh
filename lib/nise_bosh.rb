@@ -254,7 +254,7 @@ class NiseBosh
     @log.info("Post install hook for job #{job}: #{result}")
 
     unless exit_status == 0
-      exception_message = "Hook #{hook} for #{job} failed "
+      exception_message = "Post install hook for #{job} failed "
       exception_message += "(exit: #{exit_status}) "
       exception_message += " stderr: #{error_output}, stdout: #{result}"
       @log.info(exception_message)
