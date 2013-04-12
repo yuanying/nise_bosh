@@ -214,8 +214,10 @@ class NiseBosh
     unless template_only
       install_packages(job_packages(job))
     end
-    install_job_templates(job)
-    run_post_install_hook(job)
+    FileUtils.cd(File.join(@options[:install_dir], "jobs")) do
+      install_job_templates(job)
+      run_post_install_hook(job)
+    end
   end
 
   def install_base(job)
@@ -239,7 +241,6 @@ class NiseBosh
     env = {
       'PATH' => '/usr/sbin:/usr/bin:/sbin:/bin',
     }
-
 
     stdout_rd, stdout_wr = IO.pipe
     stderr_rd, stderr_wr = IO.pipe
