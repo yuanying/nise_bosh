@@ -208,7 +208,7 @@ describe NiseBosh do
       check_templates
     end
 
-    it "should runs post install hook" do
+    it "should run post install hook" do
       @nb.should_receive(:run_post_install_hook).with("angel")
       @nb.install_job("angel", true)
     end
