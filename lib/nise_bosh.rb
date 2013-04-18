@@ -235,7 +235,7 @@ class NiseBosh
     job_spec["templates"].each_pair do |template, to|
       write_template(job_spec, File.join(template_base, template), File.join(install_base, to))
     end
-    write_template(spec, File.join(@options[:repo_dir], "jobs", job, "monit"), File.join(@options[:install_dir], "bosh", "etc", "monitrc", job))
+    write_template(job_spec, File.join(@options[:repo_dir], "jobs", job, "monit"), File.join(@options[:install_dir], "bosh", "etc", "monitrc", job))
   end
 
   def run_post_install_hook(job)
