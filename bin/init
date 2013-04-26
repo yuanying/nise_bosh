@@ -10,6 +10,9 @@ nfs-common flex psmisc apparmor-utils iptables sysstat \
 rsync openssh-server traceroute libncurses5-dev quota \
 libaio1 gdb tripwire libcap2-bin libyaml-dev
 
+# stemcell_builder/stages/bosh_monit/apply.sh
+DEBIAN_FRONTEND=noninteractive apt-get install -f -y --force-yes --no-install-recommends runit
+
 # installed somewhere else
 DEBIAN_FRONTEND=noninteractive apt-get install -f -y --force-yes --no-install-recommends \
 gettext
