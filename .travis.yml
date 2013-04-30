@@ -6,3 +6,6 @@ rvm:
 
 before_install:
   - git submodule update --init --recursive
+  - sudo ./bin/init
+
+script: rvmsudo bundle exec rspec spec

@@ -216,6 +216,12 @@ class NiseBosh
     unless template_only
       install_packages(job_packages(job))
     end
+    FileUtils.mkdir_p(File.join(@options[:install_dir], "data", "packages"))
+    FileUtils.mkdir_p(File.join(@options[:install_dir], "store"))
+
+    FileUtils.mkdir_p(File.join(@options[:install_dir], "shared"))
+    FileUtils.chown('vcap', 'vcap', File.join(@options[:install_dir], "shared"))
+
     jobs_dir = File.join(@options[:install_dir], "jobs")
     FileUtils.mkdir_p(jobs_dir)
     FileUtils.cd(jobs_dir) do
@@ -291,7 +297,6 @@ class NiseBosh
     FileUtils.mkdir_p(File.dirname(to))
     open(to, "w") {|f| f.write(to_result)}
 
-    FileUtils.mkdir_p(File.join(@options[:install_dir], "data", "packages"))
     if File.basename(File.dirname(to)) == "bin"
       FileUtils.chmod(0755, to)
     end

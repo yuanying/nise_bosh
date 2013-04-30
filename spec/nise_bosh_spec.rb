@@ -192,6 +192,8 @@ describe NiseBosh do
       expect_contents(@options[:install_dir], "bosh", "etc", "monitrc")
         .to eq("monit\n")
       expect_directory_exists(@options[:install_dir], "data", "packages").to be_true
+      expect_directory_exists(@options[:install_dir], "store").to be_true
+      expect_directory_exists(@options[:install_dir], "shared").to be_true
     end
 
     it "should install packags and generate required files from template files" do
