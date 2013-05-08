@@ -6,6 +6,8 @@ shared_context "default values" do
   let(:release_dir) { File.join(assets_dir, "release") }
   let(:release_noindex_dir) { File.join(assets_dir, "release_noindex") }
   let(:deploy_manifest) { File.join(assets_dir, "manifest.yml") }
+  let(:release_name) { "assets" }
+  let(:release_version) { "1.2-dev" }
   let(:success_job) { "legna" }
   let(:packages) {
     [{:name => "miku", :file_contents => "miku 1.1-dev\n", :version => "1.1-dev"},
@@ -13,7 +15,7 @@ shared_context "default values" do
   }
   let(:package) { packages[0] }
   let(:archive_dir) { File.join(tmp_dir, "archive") }
-  let(:default_archive_name) { "assets-#{success_job}-1.1-dev.tar.gz" }
+  let(:default_archive_name) { "assets-#{success_job}-#{release_version}.tar.gz" }
   let(:job_monit_file) { "0000_#{success_job}.angel.monitrc" }
 end
 

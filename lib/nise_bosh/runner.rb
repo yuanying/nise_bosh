@@ -33,6 +33,7 @@ class Runner
     opt.on('-i INDEX_NUMBER', 'Index number for this host') { |v| @options[:index] = v }
     opt.on('-r RELEASE_FILE', 'Release file') { |v| @options[:release_file] = v }
     opt.on('-f', 'Force compile') { |v| @options[:force_compile] = true }
+    opt.on('--keep-monit-files', 'Keep existing monit files') { |v| @options[:keep_monit_files] = true }
 
     opt.parse!(argv)
     opt.banner = <<-EOF

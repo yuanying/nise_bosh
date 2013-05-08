@@ -16,6 +16,7 @@ module NiseBosh
 
       # injection
       Bosh::Agent::Config.set_nise_bosh(self)
+      Bosh::Agent::Message::Apply.set_nise_bosh(self)
       Bosh::Director::DeploymentPlan::Template.set_nise_bosh(self)
     end
 

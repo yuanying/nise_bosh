@@ -121,6 +121,17 @@ describe Runner do
       after = File.mtime(package_file_path(packages[0]))
       expect(before).to_not eq(after)
     end
+
+    it "should keep existing monit files when the --keep-monit-files option given" do
+      out = %x[bundle exec ./bin/nise-bosh -y -d #{install_dir} --working-dir #{working_dir} #{release_dir} #{deploy_manifest} #{success_job} 2>&1]
+      out = %x[bundle exec ./bin/nise-bosh --keep-monit-files -y -d #{install_dir} --working-dir #{working_dir} #{release_dir} #{deploy_manifest} yellows 2>&1]
+      expect_file_exists(install_dir, "monit", "job", job_monit_file).to be_true
+      expect_file_exists(install_dir, "monit", "job", "0000_yellows.yellows.monitrc").to be_true
+      out = %x[bundle exec ./bin/nise-bosh -y -d #{install_dir} --working-dir #{working_dir} #{release_dir} #{deploy_manifest} #{success_job} 2>&1]
+      check_installed_files
+      expect_file_exists(install_dir, "monit", "job", "0000_yellows.yellows.monitrc").to be_false
+    end
+
   end
 
   context "packages mode" do

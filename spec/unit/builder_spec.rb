@@ -164,6 +164,18 @@ describe NiseBosh do
         .to eq("tenshi\n39\n39.39.39.39\n")
     end
 
+    it "should keep existing monit files only when the option given" do
+      yellow_monit = File.join(install_dir, "monit", "job", "0000_yellows.yellows.monitrc")
+      @nb.install_job("legna")
+      @nb = NiseBosh::Builder.new(options, logger)
+      @nb.install_job("yellows")
+      expect_file_exists(install_dir, "monit", "job", job_monit_file).to be_false
+      expect_contents(yellow_monit).to eq("yellow_monit mode manual")
+      @nb = NiseBosh::Builder.new(options.merge({:keep_monit_files => true}), logger)
+      @nb.install_job("legna")
+      check_templates
+      expect_file_exists(yellow_monit).to be_true
+   end
   end
 
   describe "#sort_release_version" do
@@ -188,8 +200,8 @@ describe NiseBosh do
     def check_archive_contents(file_name)
       FileUtils.cd(@archive_check_dir) do
         system("tar xvzf #{file_name} > /dev/null")
-        expect_to_same(%W{#{options[:repo_dir]} dev_releases assets-1.1-dev.yml}, [@archive_check_dir, "release.yml"])
-        expect_file_exists(@archive_check_dir, "release", ".final_builds", "jobs", "angel", "1.tgz").to be_true
+        expect_to_same(%W{#{options[:repo_dir]} dev_releases #{release_name}-#{release_version}.yml}, [@archive_check_dir, "release.yml"])
+        expect_file_exists(@archive_check_dir, "release", ".dev_builds", "jobs", "angel", "1.1-dev.tgz").to be_true
         expect_file_exists(@archive_check_dir, "release", ".final_builds", "packages", "luca", "1.tgz").to be_true
         expect_file_exists(@archive_check_dir, "release", ".dev_builds", "packages", "miku", "1.1-dev.tgz").to be_true
       end
@@ -198,7 +210,7 @@ describe NiseBosh do
     it "create archive in current directory" do
       file_name = File.join(@archive_dir, default_archive_name)
       FileUtils.cd(@archive_dir) do
-        @nb.archive("legna", file_name)
+        @nb.archive(success_job, file_name)
         expect(File.exists?(file_name)).to be_true
       end
       check_archive_contents(file_name)
@@ -206,14 +218,14 @@ describe NiseBosh do
 
     it "create archive at given file path" do
       file_name = File.join(@archive_dir, "miku.tar.gz")
-      @nb.archive("legna", file_name)
+      @nb.archive(success_job, file_name)
       expect(File.exists?(file_name)).to be_true
       check_archive_contents(file_name)
     end
 
     it "create archive in given directory" do
       file_name = File.join(@archive_dir, default_archive_name)
-      @nb.archive("legna", @archive_dir)
+      @nb.archive(success_job, @archive_dir)
       expect(File.exists?(file_name)).to be_true
       check_archive_contents(file_name)
     end

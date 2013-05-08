@@ -2,8 +2,8 @@
 jobs:
   - name: legna
     template: angel
-  - name: dummy
-    template: angel
+  - name: yellows
+    template: yellows
 
 properties:
   miku:
