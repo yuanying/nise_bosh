@@ -108,6 +108,12 @@ module NiseBosh
         @deploy_manifest["compilation"] ||= {"workers" => 1, "network" => "default", "cloud_properties" => {}}
         @deploy_manifest["update"] ||= {"canaries" => 1, "max_in_flight" => 1, "canary_watch_time" => "1-2", "update_watch_time" => "1-2"}
         @deploy_manifest["resource_pools"] ||= [{"name" => "default", "size" => 9999, "cloud_properties" => {}, "stemcell"=> {"name" => "dummy", "version" => "dummy"}, "network" => "default"}]
+        # complete missing values
+        @deploy_manifest["jobs"].each do |job_spec|
+          job_spec["resource_pool"] ||= "default"
+          job_spec["instances"] ||= 1
+          job_spec["networks"] ||= [{"name" => "default"}]
+        end
       end
     end
 
@@ -238,12 +244,8 @@ module NiseBosh
     end
 
     def install_job(job_name, template_only = false)
-      # complete missing values
-      job_sepc = find_by_name(@deploy_manifest["jobs"], job_name)
-      job_sepc["resource_pool"] ||= "default"
-      job_sepc["instances"] ||= 1
-      job_sepc["networks"] ||= [{"name" => "default", "static_ips" => [@ip_address]}]
-
+      job_spec = find_by_name(@deploy_manifest["jobs"], job_name)
+      job_spec["networks"][0]["static_ips"] ||= [@ip_address]
 
       deployment_plan = Bosh::Director::DeploymentPlan.new(@deploy_manifest)
       deployment_plan.parse
