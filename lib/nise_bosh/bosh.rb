@@ -111,6 +111,10 @@ class Bosh::Agent::Config
   def self.set_nise_bosh(nb)
     @@nise_bosh = nb
   end
+
+  def self.configure
+    true
+  end
 end
 
 
@@ -161,6 +165,10 @@ class Bosh::Agent::Message::Apply
     end
 
     FileUtils.rm_rf(dir)
+  end
+
+  def reload_monit
+    # nop
   end
 
   def self.set_nise_bosh(nb)

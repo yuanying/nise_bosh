@@ -10,7 +10,6 @@ module NiseBosh
       initialize_options(options)
       initialize_release_file
       initialize_depoy_manifest
-      initialize_directories
 
       @logger = logger
       @index ||=  @options[:index] || 0
@@ -19,6 +18,9 @@ module NiseBosh
       Bosh::Agent::Config.set_nise_bosh(self)
       Bosh::Agent::Message::Apply.set_nise_bosh(self)
       Bosh::Director::DeploymentPlan::Template.set_nise_bosh(self)
+
+      initialize_directories
+      initialize_monit
     end
 
     attr_reader :logger
@@ -74,8 +76,9 @@ module NiseBosh
       %w(bosh jobs packages monit store shared).each do |dir|
         FileUtils.mkdir_p(File.join(@options[:install_dir], dir))
       end
-
       FileUtils.chown('vcap', 'vcap', File.join(@options[:install_dir], "shared"))
+
+      Bosh::Agent::Bootstrap.new.setup_data_sys
     end
 
     def get_newest_release(index)
@@ -117,6 +120,11 @@ module NiseBosh
           job_spec["networks"] ||= [{"name" => "default"}]
         end
       end
+    end
+
+    def initialize_monit()
+      Bosh::Agent::Monit.setup_monit_user
+      Bosh::Agent::Monit.setup_alerts
     end
 
     def archive(job, archive_name = nil)

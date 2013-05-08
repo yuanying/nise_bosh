@@ -17,7 +17,7 @@ describe Runner do
 
   def check_installed_job_files
     expect_contents(install_dir, "jobs", "angel", "config", "miku.conf").to eq("tenshi\n0\n#{current_ip}\n")
-    expect_file_mode(install_dir, "jobs", "angel", "bin", "miku_ctl").to eq(0100755)
+    expect_file_mode(install_dir, "jobs", "angel", "bin", "miku_ctl").to eq(0100750)
     expect_contents(install_dir, "monit", "job", job_monit_file).to eq("monit mode manual")
   end
 
