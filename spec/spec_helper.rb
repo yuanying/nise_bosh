@@ -1,3 +1,26 @@
+shared_context "default values" do
+  let(:tmp_dir) { File.join("/", "tmp", "nise_bosh_spec") }
+  let(:install_dir) { File.join(tmp_dir, "install") }
+  let(:working_dir) { File.join(tmp_dir, "nise_bosh_spec") }
+  let(:assets_dir) { File.join(".", "spec", "assets") }
+  let(:release_dir) { File.join(assets_dir, "release") }
+  let(:release_noindex_dir) { File.join(assets_dir, "release_noindex") }
+  let(:deploy_manifest) { File.join(assets_dir, "manifest.yml") }
+  let(:success_job) { "legna" }
+  let(:packages) {
+    [{:name => "miku", :file_contents => "miku 1.1-dev\n", :version => "1.1-dev"},
+     {:name => "luca", :file_contents => "tenshi\n", :version => "1"}]
+  }
+  let(:package) { packages[0] }
+  let(:archive_dir) { File.join(tmp_dir, "archive") }
+  let(:default_archive_name) { "assets-#{success_job}-1.1-dev.tar.gz" }
+  let(:job_monit_file) { "0000_#{success_job}.angel.monitrc" }
+end
+
+def package_file_path(package)
+  File.join(install_dir, "packages", package[:name], "dayo")
+end
+
 def current_ip()
   %x[ip -4 -o address show].match('inet ([\d.]+)/.*? scope global') { |md| md[1] }
 end
