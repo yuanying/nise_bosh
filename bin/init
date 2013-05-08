@@ -1,5 +1,7 @@
 #!/bin/bash
 
+apt-get update
+
 # stemcell_builder/stages/base_apt/apply.sh
 DEBIAN_FRONTEND=noninteractive apt-get install -f -y --force-yes --no-install-recommends \
 build-essential libssl-dev lsof \
