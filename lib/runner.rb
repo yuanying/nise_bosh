@@ -61,7 +61,7 @@ class Runner
 
   def run()
     begin
-      @nb = NiseBosh.new(@options, Logger.new($stdout))
+      @nb = NiseBosh::Builder.new(@options, Logger.new($stdout))
       send("run_#{@run_mode}_mode")
       puts "Done!"
     rescue RuntimeError => e

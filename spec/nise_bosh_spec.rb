@@ -25,23 +25,23 @@ describe NiseBosh do
     setup_directory(@options[:working_dir])
     setup_directory(@options[:install_dir])
 
-    @nb = NiseBosh.new(@options, @log)
+    @nb = NiseBosh::Builder.new(@options, @log)
     @current_ip = current_ip()
   end
 
   describe "#new" do
     it "should not raise an error when repo_dir exists" do
-      expect { NiseBosh.new(@options, @log) }.to_not raise_error
+      expect { NiseBosh::Builder.new(@options, @log) }.to_not raise_error
     end
 
     it "should raise an error when repo_dir does not exist" do
       @options[:repo_dir] = "/not/exist"
-      expect { NiseBosh.new(@options, @log) }.to raise_error
+      expect { NiseBosh::Builder.new(@options, @log) }.to raise_error
     end
 
     it "should raise an error when repo_dir does have no release index" do
       expect do
-        NiseBosh.new(@options.merge({:repo_dir => File.join(File.expand_path("."), "spec", "assets", "release_noindex")}), @log)
+        NiseBosh::Builder.new(@options.merge({:repo_dir => File.join(File.expand_path("."), "spec", "assets", "release_noindex")}), @log)
       end.to raise_error("No release index found!\nTry `bosh cleate release` in your release repository.")
     end
   end
@@ -107,7 +107,7 @@ describe NiseBosh do
       expect_contents(version_file).to eq("39\n")
       FileUtils.rm_rf(@package_installed_file)
       expect_file_exists(@package_installed_file).to be_false
-      force_nb = NiseBosh.new(@options.merge({:force_compile => true}), @log)
+      force_nb = NiseBosh::Builder.new(@options.merge({:force_compile => true}), @log)
       force_nb.install_package(@package)
       expect_contents(@package_installed_file).to eq(@package_installed_file_contents)
       expect_contents(version_file).to eq("39\n")
@@ -117,7 +117,7 @@ describe NiseBosh do
       @nb.install_package(@package)
       expect_contents(version_file).to eq("39\n")
       expect do
-        fail_while_packaging_nb = NiseBosh.new(@options.merge({:working_dir => nil, :force_compile => true}), @log)
+        fail_while_packaging_nb = NiseBosh::Builder.new(@options.merge({:working_dir => nil, :force_compile => true}), @log)
         fail_while_packaging_nb.install_package(@package)
       end.to raise_error
       expect_file_exists(version_file).to be_false
@@ -162,13 +162,13 @@ describe NiseBosh do
     end
 
     it "should fill template with given IP address and index number, and save file" do
-      @nb = NiseBosh.new(@options.merge({:ip_address => "39.39.39.39", :index => 39}), @log)
+      @nb = NiseBosh::Builder.new(@options.merge({:ip_address => "39.39.39.39", :index => 39}), @log)
       @nb.write_template(@spec, @config_template, @config_write_to)
       expect_contents(@config_write_to).to eq("tenshi\n39\n39.39.39.39\n")
     end
 
     it "should fill template with given spec.index in deploy file, and save file" do
-      @nb = NiseBosh.new(@options.merge({:deploy_config => File.join(File.expand_path("."), "spec", "assets", "deploy_overwrite_spec.conf")}), @log)
+      @nb = NiseBosh::Builder.new(@options.merge({:deploy_config => File.join(File.expand_path("."), "spec", "assets", "deploy_overwrite_spec.conf")}), @log)
       @nb.write_template(@spec, @config_template, @config_write_to)
       expect_contents(@config_write_to).to eq("tenshi\n39\n#{@current_ip}\n")
     end
@@ -261,7 +261,7 @@ describe NiseBosh do
 
   describe "#sort_release_version" do
     before do
-      @nb = NiseBosh.new(@options, @log)
+      @nb = NiseBosh::Builder.new(@options, @log)
     end
 
     it "should sort version numbers" do
