@@ -1,4 +1,5 @@
 require 'yaml'
+require 'psych'
 require 'erb'
 
 module NiseBosh
