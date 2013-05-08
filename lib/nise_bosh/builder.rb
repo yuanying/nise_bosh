@@ -9,6 +9,7 @@ module NiseBosh
       initialize_options(options)
       initialize_release_file
       initialize_depoy_manifest
+      initialize_directories
 
       @logger = logger
       @index ||=  @options[:index] || 0
@@ -65,6 +66,14 @@ module NiseBosh
       rescue
         raise "Faild to load release file!"
       end
+    end
+
+    def initialize_directories
+      %w(bosh jobs packages monit store shared).each do |dir|
+        FileUtils.mkdir_p(File.join(@options[:install_dir], dir))
+      end
+
+      FileUtils.chown('vcap', 'vcap', File.join(@options[:install_dir], "shared"))
     end
 
     def get_newest_release(index)
