@@ -1,8 +1,0 @@
----
-name: missing_template_spec
-templates:
-  no.template.here: should/fail.conf
-
-packages:
-- miku
-

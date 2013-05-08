@@ -5,20 +5,30 @@ module NiseBosh
   class Builder
     def initialize(options, logger)
       check_ruby_version
+      initialize_ip_address(options)
       initialize_options(options)
       initialize_release_file
       initialize_depoy_config
 
-      @log = logger
-      @ip_address = @options[:ip_address]
-      @ip_address ||= %x[ip -4 -o address show].match('inet ([\d.]+)/.*? scope global') { |md| md[1] }
+      @logger = logger
       @index ||=  @options[:index] || 0
+
+      Bosh::Director::Config.set_nise_bosh(self)
+      Bosh::Agent::Config.set_nise_bosh(self)
     end
+
+    attr_reader :logger
+    attr_reader :options
 
     def check_ruby_version
       if RUBY_VERSION < '1.9.0'
         raise "Ruby 1.9.0 or higher is required. Your Ruby version is #{RUBY_VERSION}"
       end
+    end
+
+    def initialize_ip_address(options)
+      @ip_address = options[:ip_address]
+      @ip_address ||= %x[ip -4 -o address show].match('inet ([\d.]+)/.*? scope global') { |md| md[1] }
     end
 
     def initialize_options(options)
@@ -76,10 +86,20 @@ module NiseBosh
     end
 
     def initialize_depoy_config()
-      begin
-        @deploy_config = YAML.load_file(@options[:deploy_config]) if @options[:deploy_config]
-      rescue
-        raise "Deploy config file not found!"
+      if @options[:deploy_config]
+        begin
+          @deploy_config = YAML.load_file(@options[:deploy_config])
+        rescue
+          raise "Deploy config file not found!"
+        end
+
+        # default values
+        @deploy_config["name"] ||= "dummy"
+        @deploy_config["releases"] ||= [{"name" => @release["name"], "version" => @release["version"]}]
+        @deploy_config["networks"] ||= [{"name" => "default", "subnets" => [{"range" => "#{@ip_address}/24", "cloud_properties" => {"name" => "DUMMY_VLAN"}, "static" => ["#{@ip_address} - #{@ip_address}"]}]}]
+        @deploy_config["compilation"] ||= {"workers" => 1, "network" => "default", "cloud_properties" => {}}
+        @deploy_config["update"] ||= {"canaries" => 1, "max_in_flight" => 1, "canary_watch_time" => "1-2", "update_watch_time" => "1-2"}
+        @deploy_config["resource_pools"] ||= [{"name" => "default", "size" => 9999, "cloud_properties" => {}, "stemcell"=> {"name" => "dummy", "version" => "dummy"}, "network" => "default"}]
       end
     end
 
@@ -89,11 +109,13 @@ module NiseBosh
       release_dir = File.join(@options[:working_dir], "release")
       FileUtils.mkdir_p(release_dir)
 
-      resolve_dependency(job_packages(job)).each do |package|
+      resolve_dependency(job_all_packages(job)).each do |package|
         copy_release_file_relative(find_package_archive(package), release_dir)
       end
 
-      copy_release_file_relative(File.join(@options[:repo_dir], "jobs", job), release_dir)
+      job_templates(job).each do |job_template|
+        copy_release_file_relative(find_job_template_archive(job_template), release_dir)
+      end
 
       FileUtils.cp(@release_file, File.join(@options[:working_dir], "release.yml"))
 
@@ -113,6 +135,25 @@ module NiseBosh
       FileUtils.cp_r(from_path, to_path)
     end
 
+    def find_jobs_release(name)
+      find_by_name(@release["jobs"], name)
+    end
+
+    def find_job_template_archive(name)
+      job = find_jobs_release(name)
+      v = job["version"]
+      major, minor = v.to_s.split("-")
+      file_name = File.join(@options[:repo_dir],
+        minor == "dev" ? ".dev_builds" : ".final_builds",
+        "jobs",
+        name,
+        "#{v}.tgz")
+      unless File.exists?(file_name)
+        raise "Job template archive for #{name} not found in #{file_name}."
+      end
+      File.expand_path(file_name)
+    end
+
     def find_package_archive(package)
       v = @spec[package]["version"]
       major, minor = v.to_s.split("-")
@@ -129,17 +170,17 @@ module NiseBosh
 
     def install_packages(packages, no_dependency = false)
       unless no_dependency
-        @log.info("Resolving package dependencies...")
+        @logger.info("Resolving package dependencies...")
         resolved_packages = resolve_dependency(packages)
       else
         resolved_packages = packages
       end
-      @log.info("Installing the following packages: ")
+      @logger.info("Installing the following packages: ")
       resolved_packages.each do |package|
-        @log.info(" * #{package}")
+        @logger.info(" * #{package}")
       end
       resolved_packages.each do |package|
-        @log.info("Installing package #{package}")
+        @logger.info("Installing package #{package}")
         install_package(package)
       end
     end
@@ -152,43 +193,25 @@ module NiseBosh
       end
       if @options[:force_compile] || current_version != @spec[package]["version"].to_s
         FileUtils.rm_rf(version_file)
-        setup_working_directory(package)
         run_packaging(package)
         File.open(version_file, 'w') do |file|
           file.puts(@spec[package]["version"].to_s)
         end
       else
-        @log.info("The same version of the package is already installed. Skipping")
+        @logger.info("The same version of the package is already installed. Skipping")
       end
     end
 
-    def setup_working_directory(package)
-      @log.info("Setting up the working directory for #{package}")
-      @log.info("Cleaning up the working directory")
-      cleanup_working_directory()
-      @log.info("Copying pakage archive")
-      file_name = find_package_archive(package)
-      FileUtils.cd(@options[:working_dir]) do
-        system("tar xzf #{file_name}  > /dev/null")
-      end
-    end
-
-    def run_packaging(package)
-      @log.info("Running the packaging script for #{package}")
-      install_dir = File.join(@options[:install_dir], "packages", package)
-      FileUtils.rm_rf(install_dir)
-      FileUtils.mkdir_p(install_dir)
-      FileUtils.cd(@options[:working_dir]) do
-        ENV["BOSH_INSTALL_TARGET"] = install_dir
-        ENV["BOSH_COMPILE_TARGET"] = @options[:working_dir]
-        ENV["BOSH_PACKAGE_NAME"] = package
-        ENV["BOSH_PACKAGE_VERSION"] = @spec[package]["version"].to_s
-        %w{GEM_HOME BUNDLE_GEMFILE RUBYOPT}.each { |key| ENV.delete(key) }
-        result = system("/bin/bash packaging")
-        unless result
-          raise "Error! Aborting..."
-        end
-      end
+    def run_packaging(name)
+      @logger.info("Running the packaging script for #{name}")
+      package = find_by_name(@release["packages"], name)
+      Bosh::Agent::Message::CompilePackage.process([
+          "dummy_blob",
+          package["sha1"],
+          name,
+          package["version"],
+          []
+        ])
     end
 
     def resolve_dependency(packages, resolved_packages = [], trace = [])
@@ -209,102 +232,73 @@ module NiseBosh
       File.exists?(File.join(@options[:repo_dir], "packages", package))
     end
 
-    def install_job(job, template_only = false)
+    def install_job(job_name, template_only = false)
+      job_sepc = find_by_name(@deploy_config["jobs"], job_name)
+      job_sepc["resource_pool"] ||= "default"
+      job_sepc["instances"] ||= 1
+      job_sepc["networks"] ||= [{"name" => "default", "static_ips" => [@ip_address]}]
+
+      Bosh::Director::DeploymentPlan::Template.set_nise_bosh(self)
+
+      deployment_plan = Bosh::Director::DeploymentPlan.new(@deploy_config)
+      deployment_plan.parse
+
+      deployment_plan_compiler = Bosh::Director::DeploymentPlanCompiler.new(deployment_plan)
+      deployment_plan_compiler.bind_properties
+      deployment_plan_compiler.bind_instance_networks
+
+      target_job = deployment_plan.jobs[deployment_plan.jobs.index { |job| job.name == job_name }]
+
+      Bosh::Director::JobUpdater.new(deployment_plan, target_job).update
+      apply_spec = target_job.instances[0].spec
+      apply_spec["index"] = @index
+
       unless template_only
-        install_packages(job_packages(job))
+        install_packages(target_job.send("run_time_dependencies"))
       end
-      FileUtils.mkdir_p(File.join(@options[:install_dir], "data", "packages"))
-      FileUtils.mkdir_p(File.join(@options[:install_dir], "store"))
 
-      FileUtils.mkdir_p(File.join(@options[:install_dir], "shared"))
-      FileUtils.chown('vcap', 'vcap', File.join(@options[:install_dir], "shared"))
+      Bosh::Agent::Message::Apply.process([apply_spec])
+    end
 
-      jobs_dir = File.join(@options[:install_dir], "jobs")
-      FileUtils.mkdir_p(jobs_dir)
-      FileUtils.cd(jobs_dir) do
-        install_job_templates(job)
-        run_post_install_hook(job)
+    def job_template_spec(job_template_name)
+      YAML.load(`tar -Oxzf #{find_job_template_archive(job_template_name)} ./job.MF`)
+    end
+
+    def job_templates(job_name)
+      templates = find_by_name(@deploy_config["jobs"], job_name)["template"]
+      templates = [templates] if templates.is_a? String
+      templates
+    end
+
+    def job_template_packages(job_template_name)
+      job_template_spec(job_template_name)["packages"]
+    end
+
+    def job_all_packages(job_name)
+      job_templates(job_name).inject([]) { |i, template|
+        i += job_template_packages(template)
+      }.uniq
+   end
+
+    def job_exists?(name)
+      !find_by_name(@deploy_config["jobs"], name).nil?
+    end
+
+    def find_by_name(set, name)
+      if set.is_a? Array
+        index = set.index do |item|
+          (item.respond_to?("name") ?
+            item.name :
+            (item["name"] || item[:name])
+          ) == name
+        end
       end
-    end
-
-    def install_base(job)
-      File.join(@options[:install_dir], "jobs", job)
-    end
-
-    def install_job_templates(job)
-      job_spec = job_spec(job)
-      template_base = File.join(@options[:repo_dir], "jobs", job, "templates")
-      install_base = File.join(@options[:install_dir], "jobs", job)
-      job_spec["templates"].each_pair do |template, to|
-        write_template(job_spec, File.join(template_base, template), File.join(install_base, to))
-      end
-      write_template(job_spec, File.join(@options[:repo_dir], "jobs", job, "monit"), File.join(@options[:install_dir], "bosh", "etc", "monitrc"))
-    end
-
-    def run_post_install_hook(job)
-      hook_file = File.join(install_base(job), "bin", "post_install")
-
-      return nil unless File.executable?(hook_file)
-
-      env = {
-        'PATH' => '/usr/sbin:/usr/bin:/sbin:/bin',
-      }
-
-      stdout_rd, stdout_wr = IO.pipe
-      stderr_rd, stderr_wr = IO.pipe
-      Process.spawn(env, hook_file, :out => stdout_wr, :err => stderr_wr, :unsetenv_others => true)
-      Process.wait
-      exit_status = $?.exitstatus
-      stdout_wr.close
-      stderr_wr.close
-      result = stdout_rd.read
-      error_output = stderr_rd.read
-
-      @log.info("Post install hook for job #{job}: #{result}")
-
-      unless exit_status == 0
-        exception_message = "Post install hook for #{job} failed "
-        exception_message += "(exit: #{exit_status}) "
-        exception_message += " stderr: #{error_output}, stdout: #{result}"
-        @log.info(exception_message)
-
-        raise exception_message
-      end
-      result
-    end
-
-    def job_packages(job)
-      job_spec(job)["packages"]
-    end
-
-    def job_spec(job)
-      YAML.load_file(File.join(@options[:repo_dir], "jobs", job, "spec"))
-    end
-
-    def write_template(job_spec, template, to)
-      spec = {
-        "properties" => @deploy_config["properties"],
-        "job" => {"name" => job_spec["name"]},
-        "networks" => {"default" => {"ip" => @ip_address}},
-        "index" => (@deploy_config["spec"] && @deploy_config["spec"]["index"]) || @index,
-      }
-      binding_helper = Bosh::Common::TemplateEvaluationContext.new(spec)
-      to_result = bind_template(ERB.new(File.read(template)), binding_helper, @index)
-
-      FileUtils.mkdir_p(File.dirname(to))
-      open(to, "w") {|f| f.write(to_result)}
-
-      if File.basename(File.dirname(to)) == "bin"
-        FileUtils.chmod(0755, to)
+      if index.nil?
+        nil
+      else
+        set[index]
       end
     end
 
-    def job_exists?(job)
-      File.exists?(File.join(@options[:repo_dir], "jobs", job))
-    end
-
-    def bind_template(template, binding_helper, index)
-      template.result(binding_helper.get_binding)
-    end
   end
 end

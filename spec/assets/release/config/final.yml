@@ -1,2 +1,7 @@
----
-final_name: test
+--- 
+blobstore: 
+  provider: local
+  options: 
+    blobstore_path: /tmp/nise_bosh_/blob
+min_cli_version: 1.0.3
+final_name: assets
