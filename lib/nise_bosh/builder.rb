@@ -13,8 +13,10 @@ module NiseBosh
       @logger = logger
       @index ||=  @options[:index] || 0
 
+      # injection
       Bosh::Director::Config.set_nise_bosh(self)
       Bosh::Agent::Config.set_nise_bosh(self)
+      Bosh::Director::DeploymentPlan::Template.set_nise_bosh(self)
     end
 
     attr_reader :logger
@@ -35,7 +37,6 @@ module NiseBosh
       @options = options
       @options[:repo_dir] = File.expand_path(@options[:repo_dir])
       raise "Release repository does not exist." unless File.exists?(@options[:repo_dir])
-
     end
 
     def initialize_release_file
@@ -62,7 +63,6 @@ module NiseBosh
           File.join(@options[:repo_dir], "dev_releases", "#{dev_name}-#{newest_release}.yml"):
           File.join(@options[:repo_dir], "releases", "#{final_name}-#{newest_release}.yml"))
         @release = YAML.load_file(@release_file)
-        @spec = @release["packages"].inject({}){|h, e| h[e["name"]] = e; h}
       rescue
         raise "Faild to load release file!"
       end
@@ -103,7 +103,6 @@ module NiseBosh
       end
     end
 
-
     def archive(job, archive_name = nil)
       cleanup_working_directory()
       release_dir = File.join(@options[:working_dir], "release")
@@ -135,35 +134,33 @@ module NiseBosh
       FileUtils.cp_r(from_path, to_path)
     end
 
-    def find_jobs_release(name)
+    def job_template_definition(name)
       find_by_name(@release["jobs"], name)
     end
 
-    def find_job_template_archive(name)
-      job = find_jobs_release(name)
-      v = job["version"]
-      major, minor = v.to_s.split("-")
-      file_name = File.join(@options[:repo_dir],
-        minor == "dev" ? ".dev_builds" : ".final_builds",
-        "jobs",
-        name,
-        "#{v}.tgz")
-      unless File.exists?(file_name)
-        raise "Job template archive for #{name} not found in #{file_name}."
-      end
-      File.expand_path(file_name)
+    def package_definition(name)
+      find_by_name(@release["packages"], name)
     end
 
-    def find_package_archive(package)
-      v = @spec[package]["version"]
+    def find_job_template_archive(name)
+      job = job_template_definition(name)
+      find_archive(job, "jobs")
+    end
+
+    def find_package_archive(name)
+      package = package_definition(name)
+      find_archive(package, "packages")
+    end
+
+    def find_archive(item, type)
+      v = item["version"]
       major, minor = v.to_s.split("-")
-      file_name = File.join(@options[:repo_dir],
+      file_name = File.join(
+        @options[:repo_dir],
         minor == "dev" ? ".dev_builds" : ".final_builds",
-        "packages",
-        package,
-        "#{v}.tgz")
+        type, item["name"], "#{v}.tgz")
       unless File.exists?(file_name)
-        raise "Package archive for #{package} not found in #{file_name}."
+        raise "Archive file for #{item["name"]} not found in #{file_name}."
       end
       File.expand_path(file_name)
     end
@@ -191,11 +188,11 @@ module NiseBosh
       if File.exists?(version_file)
         current_version = File.read(version_file).strip
       end
-      if @options[:force_compile] || current_version != @spec[package]["version"].to_s
+      if @options[:force_compile] || current_version != package_definition(package)["version"].to_s
         FileUtils.rm_rf(version_file)
         run_packaging(package)
         File.open(version_file, 'w') do |file|
-          file.puts(@spec[package]["version"].to_s)
+          file.puts(package_definition(package)["version"].to_s)
         end
       else
         @logger.info("The same version of the package is already installed. Skipping")
@@ -218,7 +215,7 @@ module NiseBosh
       packages.each do |package|
         next if resolved_packages.include?(package)
         t = Array.new(trace) << package
-        deps = @spec[package]["dependencies"] || []
+        deps = package_definition(package)["dependencies"] || []
         unless (deps & t).empty?
           raise "Detected a cyclic dependency"
         end
@@ -233,21 +230,20 @@ module NiseBosh
     end
 
     def install_job(job_name, template_only = false)
+      # complete missing values
       job_sepc = find_by_name(@deploy_manifest["jobs"], job_name)
       job_sepc["resource_pool"] ||= "default"
       job_sepc["instances"] ||= 1
       job_sepc["networks"] ||= [{"name" => "default", "static_ips" => [@ip_address]}]
 
-      Bosh::Director::DeploymentPlan::Template.set_nise_bosh(self)
 
       deployment_plan = Bosh::Director::DeploymentPlan.new(@deploy_manifest)
       deployment_plan.parse
-
       deployment_plan_compiler = Bosh::Director::DeploymentPlanCompiler.new(deployment_plan)
       deployment_plan_compiler.bind_properties
       deployment_plan_compiler.bind_instance_networks
 
-      target_job = deployment_plan.jobs[deployment_plan.jobs.index { |job| job.name == job_name }]
+      target_job = find_by_name(deployment_plan.jobs, job_name)
 
       Bosh::Director::JobUpdater.new(deployment_plan, target_job).update
       apply_spec = target_job.instances[0].spec
@@ -261,7 +257,9 @@ module NiseBosh
     end
 
     def job_template_spec(job_template_name)
-      YAML.load(`tar -Oxzf #{find_job_template_archive(job_template_name)} ./job.MF`)
+      @job_template_spec ||= {}
+      @job_template_spec[@job_template_spec] ||=
+        YAML.load(`tar -Oxzf #{find_job_template_archive(job_template_name)} ./job.MF`)
     end
 
     def job_templates(job_name)

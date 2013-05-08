@@ -30,12 +30,12 @@ class Bosh::Director::DeploymentPlan::Template
 
   # @return [String]
   def version
-    @@nise_bosh.find_jobs_release(@name)["version"].to_s
+    @@nise_bosh.job_template_definition(@name)["version"].to_s
   end
 
   # @return [String]
   def sha1
-    @@nise_bosh.find_jobs_release(@name)["sha1"]
+    @@nise_bosh.job_template_definition(@name)["sha1"]
   end
 
   # @return [String]
