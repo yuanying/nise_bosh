@@ -8,14 +8,10 @@ class Bosh::Director::Config
   end
 
   def self.logger
-    @@nise_bosh.logger
+    @@logger ||= Logger.new("/dev/null")
   end
   def self.event_log
     @@event_log ||= Bosh::Director::EventLog.new
-  end
-
-  def self.set_nise_bosh(nb)
-    @@nise_bosh = nb
   end
 end
 
@@ -105,7 +101,7 @@ class Bosh::Agent::Config
   end
 
   def self.logger
-    @@nise_bosh.logger
+    @@logger ||= Logger.new("/dev/null")
   end
 
   def self.nise_bosh
@@ -188,11 +184,6 @@ class Bosh::Agent::Message::CompilePackage
     @logger.level = Logger::DEBUG
     @compile_base = "#{@base_dir}/data/compile"
     @install_base = "#{@base_dir}/data/packages"
-
-    # why?
-    %w(bosh jobs packages monit).each do |dir|
-      FileUtils.mkdir_p(File.join(@base_dir, dir))
-    end
   end
 
   def get_source_package

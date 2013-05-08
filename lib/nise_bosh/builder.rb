@@ -14,7 +14,6 @@ module NiseBosh
       @index ||=  @options[:index] || 0
 
       # injection
-      Bosh::Director::Config.set_nise_bosh(self)
       Bosh::Agent::Config.set_nise_bosh(self)
       Bosh::Director::DeploymentPlan::Template.set_nise_bosh(self)
     end
