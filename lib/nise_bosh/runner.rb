@@ -36,17 +36,17 @@ class Runner
 
     opt.parse!(argv)
     opt.banner = <<-EOF
-       Usage: nise-bosh [OPTION]... RELEASE_REPOSITORY DEPLOY_CONFIG JOB_NAME
-       or:  nise-bosh -a [OPTION]... RELEASE_REPOSITORY DEPLOY_CONFIG JOB_NAME [OUTPUT_PATH]
+       Usage: nise-bosh [OPTION]... RELEASE_REPOSITORY DEPLOY_MANIFEST JOB_NAME
+       or:  nise-bosh -a [OPTION]... RELEASE_REPOSITORY DEPLOY_MANIFEST JOB_NAME [OUTPUT_PATH]
        or:  nise-bosh -p [--no-dependency] RELEASE_REPOSITORY PACKAGE_NAME...
        EOF
 
     @options[:repo_dir] = argv.shift
     if @run_mode == :default && argv.size == 2
-      @options[:deploy_config] = argv.shift
+      @options[:deploy_manifest] = argv.shift
       @job_name = argv.shift
     elsif @run_mode == :archive && (argv.size == 3 || argv.size == 2)
-      @options[:deploy_config] = argv.shift
+      @options[:deploy_manifest] = argv.shift
       @job_name = argv.shift
       @output_file = argv.shift
     elsif @run_mode== :package && argv.size >= 1

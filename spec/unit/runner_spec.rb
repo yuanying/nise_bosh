@@ -8,7 +8,7 @@ describe Runner do
   let(:assets_dir) { File.join(".", "spec", "assets") }
   let(:release_dir) { File.join(assets_dir, "release") }
   let(:release_noindex_dir) { File.join(assets_dir, "release_noindex") }
-  let(:deploy_conf) { File.join(assets_dir, "deploy.conf") }
+  let(:deploy_conf) { File.join(assets_dir, "manifest.yml") }
   let(:success_job) { "legna" }
   let(:packages) do
     [{:name => "miku", :file_contents => "miku 1.1-dev", :version => "1.1-dev"},

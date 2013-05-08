@@ -9,7 +9,7 @@ describe NiseBosh do
     @options = {
       :repo_dir => File.join(File.expand_path("."), "spec", "assets", "release"),
       :install_dir => File.join(@tmp_dir, "install"),
-      :deploy_config => File.join(File.expand_path("."), "spec", "assets", "deploy.conf"),
+      :deploy_manifest => File.join(File.expand_path("."), "spec", "assets", "manifest.yml"),
       :working_dir => File.join(@tmp_dir, "working"),
     }
     @log = Logger.new("/dev/null")

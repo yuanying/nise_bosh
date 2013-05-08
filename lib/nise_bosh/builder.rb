@@ -8,7 +8,7 @@ module NiseBosh
       initialize_ip_address(options)
       initialize_options(options)
       initialize_release_file
-      initialize_depoy_config
+      initialize_depoy_manifest
 
       @logger = logger
       @index ||=  @options[:index] || 0
@@ -85,21 +85,21 @@ module NiseBosh
       result.map {|v| v[1] ? v.join("-") : v[0]}
     end
 
-    def initialize_depoy_config()
-      if @options[:deploy_config]
+    def initialize_depoy_manifest()
+      if @options[:deploy_manifest]
         begin
-          @deploy_config = YAML.load_file(@options[:deploy_config])
+          @deploy_manifest = YAML.load_file(@options[:deploy_manifest])
         rescue
-          raise "Deploy config file not found!"
+          raise "Manifest file not found!"
         end
 
         # default values
-        @deploy_config["name"] ||= "dummy"
-        @deploy_config["releases"] ||= [{"name" => @release["name"], "version" => @release["version"]}]
-        @deploy_config["networks"] ||= [{"name" => "default", "subnets" => [{"range" => "#{@ip_address}/24", "cloud_properties" => {"name" => "DUMMY_VLAN"}, "static" => ["#{@ip_address} - #{@ip_address}"]}]}]
-        @deploy_config["compilation"] ||= {"workers" => 1, "network" => "default", "cloud_properties" => {}}
-        @deploy_config["update"] ||= {"canaries" => 1, "max_in_flight" => 1, "canary_watch_time" => "1-2", "update_watch_time" => "1-2"}
-        @deploy_config["resource_pools"] ||= [{"name" => "default", "size" => 9999, "cloud_properties" => {}, "stemcell"=> {"name" => "dummy", "version" => "dummy"}, "network" => "default"}]
+        @deploy_manifest["name"] ||= "dummy"
+        @deploy_manifest["releases"] ||= [{"name" => @release["name"], "version" => @release["version"]}]
+        @deploy_manifest["networks"] ||= [{"name" => "default", "subnets" => [{"range" => "#{@ip_address}/24", "cloud_properties" => {"name" => "DUMMY_VLAN"}, "static" => ["#{@ip_address} - #{@ip_address}"]}]}]
+        @deploy_manifest["compilation"] ||= {"workers" => 1, "network" => "default", "cloud_properties" => {}}
+        @deploy_manifest["update"] ||= {"canaries" => 1, "max_in_flight" => 1, "canary_watch_time" => "1-2", "update_watch_time" => "1-2"}
+        @deploy_manifest["resource_pools"] ||= [{"name" => "default", "size" => 9999, "cloud_properties" => {}, "stemcell"=> {"name" => "dummy", "version" => "dummy"}, "network" => "default"}]
       end
     end
 
@@ -233,14 +233,14 @@ module NiseBosh
     end
 
     def install_job(job_name, template_only = false)
-      job_sepc = find_by_name(@deploy_config["jobs"], job_name)
+      job_sepc = find_by_name(@deploy_manifest["jobs"], job_name)
       job_sepc["resource_pool"] ||= "default"
       job_sepc["instances"] ||= 1
       job_sepc["networks"] ||= [{"name" => "default", "static_ips" => [@ip_address]}]
 
       Bosh::Director::DeploymentPlan::Template.set_nise_bosh(self)
 
-      deployment_plan = Bosh::Director::DeploymentPlan.new(@deploy_config)
+      deployment_plan = Bosh::Director::DeploymentPlan.new(@deploy_manifest)
       deployment_plan.parse
 
       deployment_plan_compiler = Bosh::Director::DeploymentPlanCompiler.new(deployment_plan)
@@ -265,7 +265,7 @@ module NiseBosh
     end
 
     def job_templates(job_name)
-      templates = find_by_name(@deploy_config["jobs"], job_name)["template"]
+      templates = find_by_name(@deploy_manifest["jobs"], job_name)["template"]
       templates = [templates] if templates.is_a? String
       templates
     end
@@ -281,7 +281,7 @@ module NiseBosh
    end
 
     def job_exists?(name)
-      !find_by_name(@deploy_config["jobs"], name).nil?
+      !find_by_name(@deploy_manifest["jobs"], name).nil?
     end
 
     def find_by_name(set, name)
