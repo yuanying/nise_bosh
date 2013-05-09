@@ -3,7 +3,7 @@
 
 # Nise BOSH
 
-## What's this
+## What's this?
 
 Nise BOSH is a lightweight BOSH emulator. You can easily install multiple BOSH packages on your servers by Nise BOSH commands. 'Nise' means 'Pseudo' in Japanese.
 
@@ -37,25 +37,25 @@ Nise BOSH requries a clone of the 'release' repository you want to install (e.g.
 
 You have to build a release of your release repository to create package tarballs.
 
-If you have not installed BOSH CLI. You can install it with `gem` command.
+If you have not installed BOSH CLI. You can install it with the `gem` command.
 
     gem install bosh_cli
 
-Then build a release, this might takes several minutes at the first run.
+Then build a release, this might take several minutes at the first run.
 
     bosh create release
 
-You shall be asked the name of the build, input a preferred name such as 'appcloud'.
+You will be asked the name of the build, input the preferred name such as 'appcloud'.
 
-The command generates "dev_releases" and ".dev_builds" directories in your cloned release directory. You can find the "release file" for the build at "dev_release/\<build_name\>-\<viersion\>-dev.yml", which includes the list of all the packages and jobs, and their dependencies.
+The command generates "dev_releases" and ".dev_builds" directories in your cloned release directory. You can find the "release file" for the build at "dev_release/\<build_name\>-\<viersion\>-dev.yml", which includes the list of all the packages, jobs, and their dependencies.
 
-Note that, when you have any modification in your release repository, you have to commit them once before buliding a new release. You might need to execute 'bosh create release ' with "--force" option, when you have added new files into the blobs directory.
+Note that, when you have any modification in your release repository, you have to commit them once before buliding a new release. You might need to execute 'bosh create release ' with "--force" option when you have added new files into the blobs directory.
 
 ### Describe a deployment manifest
 
-Nise-BOSH requires a deployment manifest which contains the configuration of your release. Nise-BOSH's manifest file is compatible with, or subset of Bosh's manifest format.
+Nise-BOSH requires a deployment manifest, which contains the configuration of your release. The Nise-BOSH's manifest file is compatible with, or a subset of, BOSH's manifest format.
 
-You can find an example at [Cloud foundry's OSS docs](https://github.com/cloudfoundry/oss-docs/blob/master/bosh/tutorial/examples/bosh_manifest.yml).
+You can find an example at [Cloud foundry docs](http://docs.cloudfoundry.com/docs/running/deploying-cf/vsphere/cloud-foundry-example-manifest.html).
 
     ---
     properties:
@@ -91,7 +91,7 @@ Example:
 
 ### Initialize the environment (optional)
 
-You need to install and create required apt packages and users on your environemnt to execute certain job processes from cf-release. The original BOSH sets up the environment using a stemcell, but Nise-BOSH does not support it. You can simulate a stemcell-like environment on your server by executing the `bin/init` script.
+You need to install and create the required apt packages and users on your environemnt to execute certain job processes from cf-release. The original BOSH sets up the environment using a stemcell, but Nise-BOSH does not support it. You can simulate a stemcell-like environment on your server by executing the `bin/init` script.
 
     sudo ./bin/init
 
@@ -99,17 +99,17 @@ This script runs the minimal (sometimes insufficient) commands extracted from th
 
 ### Create stemcell_base.tar.gz (optional)
 
-Some packages require `/var/vcap/stemcell_base.tar.gz` file to create Warden containers. You can create the file by executing the `bin/gen-stemcell` script.
+Some packages require the `/var/vcap/stemcell_base.tar.gz` file to create Warden containers. You can create the file by executing the `bin/gen-stemcell` script.
 
     sudo ./bin/gen-stemcell
 
 ### Launch processes
 
-Once instllation is complete, you can launch job processes by `run-job` command.
+Once instllation is complete, you can launch job processes by the `run-job` command.
 
     ./bin/run-job start
 
-This command automatically loads the monitrc file (default in: /var/vcap/bosh/etc/monitrc) and start all the processes defined in it. You can also invoke stop and status commands by giving an option.
+This command automatically loads the monitrc file (default in: /var/vcap/bosh/etc/monitrc) and starts all the processes defined in it. You can also invoke stop and status commands by giving an option.
 
     ./bin/run-job status
     ./bin/run-job stop
@@ -118,15 +118,15 @@ This command automatically loads the monitrc file (default in: /var/vcap/bosh/et
 
 ### '-y': Assume yes as an answer to all prompts
 
-Nise-BOSH do not ask any prompts.
+Nise-BOSH does not ask any prompts.
 
 ### '-f': Force install packages
 
-By default, Nise-BOSH do not re-install packages which are already installed. This option forces Nise BOSH to re-install all packages.
+By default, Nise-BOSH does not re-install packages that are already installed. This option forces Nise BOSH to re-install all packages.
 
 ### '-d': Install directory
 
-Nise-BOSH installs packages into this directory. The default value is `/var/vcap`. Be careful to change this value because some packages given by cf-release have hard-coded directory names in their packaging scripts and template files.
+Nise-BOSH installs packages into this directory. The default value is `/var/vcap`. Be sure to change this value because some packages given by cf-release have hard-coded directory names in their packaging scripts and template files.
 
 ### '--working-dir': Temporary working directory
 
@@ -134,23 +134,23 @@ Nise-BOSH uses the given directory to run packaging scripts. The default value i
 
 ### '-t': Install template files only
 
-Nise-BOSH do not install the required packages for the given job. Nise-BOSH only fills template files for the given job and write out them to the install directory.
+Nise-BOSH does not install the required packages for the given job. Nise-BOSH only fills template files for the given job and writes them out to the install directory.
 
 ### '-r': Release file
 
-Nise-BOSH uses the given release file for deploy not the newest release file. By default, Nise BOSH automatically detect the newest release file.
+Nise-BOSH uses the given release file for deploying. By default, Nise BOSH automatically detects the newest release file.
 
 ### '-n': IP address for the host
 
-Nise-BOSH assumes the IP address of your host using 'ifconfig eth0' command. You can overwrite the IP address of your host by this option.
+Nise-BOSH assumes the IP address of your host using 'ip' command by default. You can overwrite the value by this option.
 
 ### '-i': Index number for the host
 
-Nise-BOSH assumes the index number of your host as 0 by default. When you install the same job on multiple hosts, you can set the index number by this option. The value "spec.index" in job template files is replaced by this value.
+Nise-BOSH assumes the index number of your host is assigned as 0 by default. When you install the same job on multiple hosts, you can set the index number with this option. The value "spec.index" in the job template files is replaced with this value.
 
 ### '-p': Install specific packages
 
-Nise-BOSH install the given packages, not a job. When this option choosen, file path for the deploy manifest file must be ommited.
+Nise-BOSH installs the given packages, not a job. When this option is choosen, the file path for the deploy manifest file must be ommited.
 
 Example:
 
@@ -162,25 +162,25 @@ Nise-BOSH does not install dependency packages. This option must be used with '-
 
 ### '-a': Create an archive file for a job
 
-Nise-BOSH aggregates the packages and the index file required to install the given job and create an archive file includes them. This behavior is similar to 'bosh create release --with-tarball', but the generated archive file contains the minimum packages to install the given job.
+Nise-BOSH aggregates the packages and the index file required to install the given job and creates an archive file that includes them. This behavior is similar to 'bosh create release --with-tarball', but the generated archive file contains the minimum packages to install the given job.
 
 ## Appendix
 
 ### stemcell_base.tar.gz builder
 
-You can generate stemcell_base.tar.gz for the rootfs of Warden containers by 'gen-stemcell' command. Default config files are found in the config directory. Before executing, change the password for containers in config/stemcell-settings.sh.
+You can generate stemcell_base.tar.gz for the rootfs of Warden containers by the 'gen-stemcell' command. Default config files are found in the config directory. Before executing, change the password for containers in config/stemcell-settings.sh.
 
     sudo ./bin/gen-stemcell [<output_filename_or_directory>]
 
-The generated archive file are placed on /var/vcap/stemcell_base.tar.gz by default. You can change the path and other behaviour by giving command line options shown by the '--help' option.
+The generated archive file is placed on /var/vcap/stemcell_base.tar.gz by default. You can change the path and other behaviour by the giving command line options shown by the '--help' option.
 
 ### init
 
-You can install basic apt packages and create user for the BOSH stemcell with this command.
+You can install basic apt packages and create users for the BOSH stemcell with this command.
 
 ### bget
 
-You can download objects from the blobstore for cf-release by using 'bget' command.
+You can download objects from the blobstore for cf-release by using the 'bget' command.
 
     ./bin/bget -o <output_file_name> <object_id>
 
