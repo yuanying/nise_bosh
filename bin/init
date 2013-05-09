@@ -78,6 +78,7 @@ set httpd port 2822 and use address 127.0.0.1
 include /var/vcap/monit/*.monitrc
 include /var/vcap/monit/job/*.monitrc
 EOF
+chmod 0700 $bosh_dir/etc/monitrc
 mkdir -p $bosh_app_dir/monit
 touch $bosh_app_dir/monit/empty.monitrc
 
