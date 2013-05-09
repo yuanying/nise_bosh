@@ -31,12 +31,11 @@ Run the command below:
 
 ### Release repository
 
-Nise BOSH requries a clone of the 'release' repository you want to install (e.g. cf-release for Cloud Foundry). Clone the repository and checkout its submodules at your preferred directory.
+Nise BOSH requries a clone of the 'release' repository you want to install (e.g. cf-release for Cloud Foundry). Clone the repository and checkout its submodules at your preferred directory with the `update` script.
 
     git clone git@github.com:cloudfoundry/cf-release.git
     cd cf-release
-    git submodule sync
-    git submodule update --init --recursive
+    ./update
 
 ### Build a release
 
@@ -63,6 +62,10 @@ Nise-BOSH requires a deployment manifest, which contains the configuration of yo
 You can find an example at [Cloud foundry docs](http://docs.cloudfoundry.com/docs/running/deploying-cf/vsphere/cloud-foundry-example-manifest.html).
 
     ---
+    jobs:
+      - name: devbox
+        template: dea_next
+
     properties:
       domain: vcap.me
     
@@ -92,9 +95,9 @@ Run `nise-bosh` command. You may want to run with 'sudo' and/or 'bundle exec'
 
 Example:
 
-    sudo PATH=$PATH bundle exec ./bin/nise-bosh ~/cf-release ~/deploy.conf dea_next
+    sudo PATH=$PATH bundle exec ./bin/nise-bosh ~/cf-release ~/deploy.conf devbox
 
-### Initialize the environment (optional)
+### Initialize the environment
 
 You need to install and create the required apt packages and users on your environemnt to execute certain job processes from cf-release. The original BOSH sets up the environment using a stemcell, but Nise-BOSH does not support it. You can simulate a stemcell-like environment on your server by executing the `bin/init` script.
 
@@ -102,22 +105,11 @@ You need to install and create the required apt packages and users on your envir
 
 This script runs the minimal (sometimes insufficient) commands extracted from the stemcell-builder stages.
 
-### Create stemcell_base.tar.gz (optional)
-
-Some packages require the `/var/vcap/stemcell_base.tar.gz` file to create Warden containers. You can create the file by executing the `bin/gen-stemcell` script.
-
-    sudo ./bin/gen-stemcell
-
 ### Launch processes
 
-Once instllation is complete, you can launch job processes by the `run-job` command.
+Once instllation is complete, you can launch job processes by the `monit` command installed by the `bin/init` script.
 
-    ./bin/run-job start
-
-This command automatically loads the monitrc file (default in: /var/vcap/bosh/etc/monitrc) and starts all the processes defined in it. You can also invoke stop and status commands by giving an option.
-
-    ./bin/run-job status
-    ./bin/run-job stop
+    sudo /var/vcap/bosh/bin/monit start all
 
 ## Command line options
 
