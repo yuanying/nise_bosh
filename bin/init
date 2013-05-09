@@ -1,5 +1,7 @@
 #!/bin/bash
 
+bosh_dir=/var/vcap/bosh
+
 apt-get update
 
 # stemcell_builder/stages/base_apt/apply.sh
@@ -54,6 +56,30 @@ then
 else
   apt-get install -y linux-image-virtual
 fi
+
+# stemcell_builder/stages/bosh_monit/apply.sh
+monit_basename=monit-5.2.4
+(
+    cd /tmp
+    wget "http://mmonit.com/monit/dist/${monit_basename}.tar.gz"
+    tar xvzf ${monit_basename}.tar.gz
+    cd ${monit_basename}
+    ./configure --prefix=$bosh_dir --without-ssl
+    make -j4 && make install
+)
+mkdir -p $bosh_dir/etc
+cat <<EOF > /$bosh_dir/etc/monitrc
+set daemon 10
+set logfile /var/vcap/monit/monit.log
+
+set httpd port 2822 and use address 127.0.0.1
+  allow cleartext /var/vcap/monit/monit.user
+
+include /var/vcap/monit/*.monitrc
+include /var/vcap/monit/job/*.monitrc
+EOF
+mkdir -p $bosh_app_dir/monit
+touch $bosh_app_dir/monit/empty.monitrc
 
 echo Done.
 
