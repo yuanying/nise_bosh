@@ -7,6 +7,11 @@
 
 Nise BOSH is a lightweight BOSH emulator. You can easily install multiple BOSH packages on your servers by Nise BOSH commands. 'Nise' means 'Pseudo' in Japanese.
 
+## Links
+
+* [Step by Step Guide on Cloud Foundry Blog](http://blog.cloudfoundry.com/2013/04/15/ntt-contributes-nise-bosh-a-tool-to-speed-up-bosh-development/)
+* [Architecture Guide](http://www.slideshare.net/i_yudai/nise-bosh-in-action)
+
 ## Requirements
 
 * Ubuntu 10.04, 12.04
