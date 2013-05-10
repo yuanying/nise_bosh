@@ -1,6 +1,7 @@
 #!/bin/bash
 
-bosh_dir=/var/vcap/bosh
+bosh_app_dir=/var/vcap
+bosh_dir=${bosh_app_dir}/bosh
 
 apt-get update
 
