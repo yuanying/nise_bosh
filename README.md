@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/nttlabs/nise_bosh.png?branch=master)](https://travis-ci.org/nttlabs/nise_bosh)
 [![Code Climate](https://codeclimate.com/github/nttlabs/nise_bosh.png)](https://codeclimate.com/github/nttlabs/nise_bosh)
 
-# Nise BOSH
+# Nise BOSH v2
 
 ## What's this?
 
@@ -9,8 +9,9 @@ Nise BOSH is a lightweight BOSH emulator. You can easily install multiple BOSH p
 
 ## Links
 
-* [Step by Step Guide on Cloud Foundry Blog](http://blog.cloudfoundry.com/2013/04/15/ntt-contributes-nise-bosh-a-tool-to-speed-up-bosh-development/)
-* [Architecture Guide](http://www.slideshare.net/i_yudai/nise-bosh-in-action)
+* [Step by Step Guide on Cloud Foundry Blog (v1)](http://blog.cloudfoundry.com/2013/04/15/ntt-contributes-nise-bosh-a-tool-to-speed-up-bosh-development/)
+* [Architecture Guide (v1)](http://www.slideshare.net/i_yudai/nise-bosh-in-action)
+* [Cloud Foundry Devbox manifest and installer script for Nise BOSH v2](https://gist.github.com/yudai/5553213)
 
 ## Requirements
 
@@ -20,6 +21,8 @@ Nise BOSH is a lightweight BOSH emulator. You can easily install multiple BOSH p
 * Bundler
 
 ## How to use
+
+Quick Install: [Cloud Foundry Devbox manifest and installer script for Nise BOSH v2](https://gist.github.com/yudai/5553213)
 
 ### Install required gems
 
