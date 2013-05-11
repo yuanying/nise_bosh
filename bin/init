@@ -62,7 +62,7 @@ fi
 monit_basename=monit-5.2.4
 (
     cd /tmp
-    wget "http://mmonit.com/monit/dist/${monit_basename}.tar.gz"
+    wget -nc -r "http://mmonit.com/monit/dist/${monit_basename}.tar.gz"
     tar xvzf ${monit_basename}.tar.gz
     cd ${monit_basename}
     ./configure --prefix=$bosh_dir --without-ssl
