@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -ex
 
 bosh_app_dir=/var/vcap
 bosh_dir=${bosh_app_dir}/bosh
