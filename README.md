@@ -9,9 +9,21 @@ Nise BOSH is a lightweight BOSH emulator. You can easily install multiple BOSH p
 
 ## Links
 
+* [Cloud Foundry v2 Devbox manifest and installer script for Nise BOSH v2](https://gist.github.com/yudai/5553213)
+* [Nise BOSH Vagrant](https://github.com/BrianMMcClain/nise-bosh-vagrant) 
+ * Vagrant integration by BrianMMcClain. See also: "[Introducing Nise-bosh-vagrant](http://catdevrandom.me/blog/2013/05/21/introducing-nise-bosh-vagrant/)"
+
+
 * [Step by Step Guide on Cloud Foundry Blog (v1)](http://blog.cloudfoundry.com/2013/04/15/ntt-contributes-nise-bosh-a-tool-to-speed-up-bosh-development/)
 * [Architecture Guide (v1)](http://www.slideshare.net/i_yudai/nise-bosh-in-action)
-* [Cloud Foundry Devbox manifest and installer script for Nise BOSH v2](https://gist.github.com/yudai/5553213)
+
+### Other resources
+
+* [BOSH](https://github.com/cloudfoundry/bosh)
+ * The original tool chain
+ * Reccomended when IaaS support is available
+* [cf-vagrant-installer](https://github.com/Altoros/cf-vagrant-installer)
+ * Vagrant installer for Cloud Foundry v2
 
 ## Requirements
 
@@ -22,7 +34,7 @@ Nise BOSH is a lightweight BOSH emulator. You can easily install multiple BOSH p
 
 ## How to use
 
-Quick Install: [Cloud Foundry Devbox manifest and installer script for Nise BOSH v2](https://gist.github.com/yudai/5553213)
+(You can also find a sample manifest file and shell commands at "[Cloud Foundry Devbox manifest and installer script for Nise BOSH v2](https://gist.github.com/yudai/5553213)")
 
 ### Install required gems
 
