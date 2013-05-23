@@ -98,6 +98,12 @@ describe Runner do
       expect(out).to eq("No release index found!\nTry `bosh cleate release` in your release repository.\n")
     end
 
+    it "should raise an error when execution of packaging script fails" do
+      out = %x[bundle exec ./bin/nise-bosh -y -d #{install_dir} --working-dir #{working_dir} #{release_dir} #{deploy_manifest} #{fail_job} 2>&1]
+      expect($?.exitstatus).to eq(1)
+      expect(out.match(/packaging: line 3: not_exist_command: command not found/)).to be_true
+    end
+
     it "should not re-install the packages of the given job which has been already installed the same version" do
       out = %x[bundle exec ./bin/nise-bosh -y -d #{install_dir} --working-dir #{working_dir} #{release_dir} #{deploy_manifest} #{success_job} 2>&1]
       before =  File.mtime(package_file_path(packages[0]))

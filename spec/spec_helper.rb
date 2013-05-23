@@ -7,8 +7,9 @@ shared_context "default values" do
   let(:release_noindex_dir) { File.join(assets_dir, "release_noindex") }
   let(:deploy_manifest) { File.join(assets_dir, "manifest.yml") }
   let(:release_name) { "assets" }
-  let(:release_version) { "1.2-dev" }
+  let(:release_version) { "1.3-dev" }
   let(:success_job) { "legna" }
+  let(:fail_job) { "fail_job" }
   let(:packages) {
     [{:name => "miku", :file_contents => "miku 1.1-dev\n", :version => "1.1-dev"},
      {:name => "luca", :file_contents => "tenshi\n", :version => "1"}]

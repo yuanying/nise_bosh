@@ -4,6 +4,8 @@ jobs:
     template: angel
   - name: yellows
     template: yellows
+  - name: fail_job
+    template: fail_job
 
 properties:
   miku:

@@ -233,6 +233,10 @@ module NiseBosh
           package["version"],
           []
         ])
+    rescue Bosh::Agent::MessageHandlerError => e
+      @logger.info("An error occurred while compiling #{name}")
+      @logger.info(e.blob)
+      raise e
     end
 
     def resolve_dependency(packages, resolved_packages = [], trace = [])
