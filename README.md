@@ -110,7 +110,7 @@ Run `nise-bosh` command. You may want to run with 'sudo' and/or 'bundle exec'
 
 Example:
 
-    sudo PATH=$PATH bundle exec ./bin/nise-bosh ~/cf-release ~/deploy.conf devbox
+    sudo env PATH=$PATH bundle exec ./bin/nise-bosh ~/cf-release ~/deploy.conf devbox
 
 ### Initialize the environment
 
@@ -166,7 +166,7 @@ Nise-BOSH installs the given packages, not a job. When this option is choosen, t
 
 Example:
 
-    sudo PATH=$PATH bundle exec ./bin/nise-bosh -p ~/cf-release_interim dea_jvm dea_ruby
+    sudo env PATH=$PATH bundle exec ./bin/nise-bosh -p ~/cf-release_interim dea_jvm dea_ruby
 
 ### '--no-dependency': Install no dependeny packages
 
