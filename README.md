@@ -21,14 +21,14 @@ Nise BOSH is a lightweight BOSH emulator. You can easily install multiple BOSH p
 
 * [BOSH](https://github.com/cloudfoundry/bosh)
  * The original tool chain
- * Reccomended when IaaS support is available
+ * Recommended when IaaS support is available
 * [cf-vagrant-installer](https://github.com/Altoros/cf-vagrant-installer)
  * Vagrant installer for Cloud Foundry v2
 
 ## Requirements
 
 * Ubuntu 10.04, 12.04
- * Ubuntu 10.04 64bit is recmmended when you install cf-release jobs.
+ * Ubuntu 10.04 64bit is recommended when you install cf-release jobs.
 * Ruby 1.9.2 or higher
 * Bundler
 
@@ -38,7 +38,7 @@ Nise BOSH is a lightweight BOSH emulator. You can easily install multiple BOSH p
 
 ### Install required gems
 
-You can install the requried gems to execute Nise BOSH commands with bundler.
+You can install the required gems to execute Nise BOSH commands with bundler.
 
 Run the command below:
 
@@ -46,7 +46,7 @@ Run the command below:
 
 ### Release repository
 
-Nise BOSH requries a clone of the 'release' repository you want to install (e.g. cf-release for Cloud Foundry). Clone the repository and checkout its submodules at your preferred directory with the `update` script.
+Nise BOSH requires a clone of the 'release' repository you want to install (e.g. cf-release for Cloud Foundry). Clone the repository and checkout its submodules at your preferred directory with the `update` script.
 
     git clone git@github.com:cloudfoundry/cf-release.git
     cd cf-release
@@ -66,9 +66,9 @@ Then build a release, this might take several minutes at the first run.
 
 You will be asked the name of the build, input the preferred name such as 'appcloud'.
 
-The command generates "dev_releases" and ".dev_builds" directories in your cloned release directory. You can find the "release file" for the build at "dev_release/\<build_name\>-\<viersion\>-dev.yml", which includes the list of all the packages, jobs, and their dependencies.
+The command generates "dev_releases" and ".dev_builds" directories in your cloned release directory. You can find the "release file" for the build at "dev_release/\<build_name\>-\<version\>-dev.yml", which includes the list of all the packages, jobs, and their dependencies.
 
-Note that, when you have any modification in your release repository, you have to commit them once before buliding a new release. You might need to execute 'bosh create release ' with "--force" option when you have added new files into the blobs directory.
+Note that, when you have any modification in your release repository, you have to commit them once before building a new release. You might need to execute 'bosh create release ' with "--force" option when you have added new files into the blobs directory.
 
 ### Describe a deployment manifest
 
@@ -114,7 +114,7 @@ Example:
 
 ### Initialize the environment
 
-You need to install and create the required apt packages and users on your environemnt to execute certain job processes from cf-release. The original BOSH sets up the environment using a stemcell, but Nise-BOSH does not support it. You can simulate a stemcell-like environment on your server by executing the `bin/init` script.
+You need to install and create the required apt packages and users on your environment to execute certain job processes from cf-release. The original BOSH sets up the environment using a stemcell, but Nise-BOSH does not support it. You can simulate a stemcell-like environment on your server by executing the `bin/init` script.
 
     sudo ./bin/init
 
@@ -122,7 +122,7 @@ This script runs the minimal (sometimes insufficient) commands extracted from th
 
 ### Launch processes
 
-Once instllation is complete, you can launch job processes by the `monit` command installed by the `bin/init` script.
+Once installation is complete, you can launch job processes by the `monit` command installed by the `bin/init` script.
 
     sudo /var/vcap/bosh/bin/monit start all
 
@@ -162,13 +162,13 @@ Nise-BOSH assumes the index number of your host is assigned as 0 by default. Whe
 
 ### '-p': Install specific packages
 
-Nise-BOSH installs the given packages, not a job. When this option is choosen, the file path for the deploy manifest file must be ommited.
+Nise-BOSH installs the given packages, not a job. When this option is chosen, the file path for the deploy manifest file must be omitted.
 
 Example:
 
     sudo env PATH=$PATH bundle exec ./bin/nise-bosh -p ~/cf-release_interim dea_jvm dea_ruby
 
-### '--no-dependency': Install no dependeny packages
+### '--no-dependency': Install no dependency packages
 
 Nise-BOSH does not install dependency packages. This option must be used with '-c' option.
 
@@ -184,7 +184,7 @@ You can generate stemcell_base.tar.gz for the rootfs of Warden containers by the
 
     sudo ./bin/gen-stemcell [<output_filename_or_directory>]
 
-The generated archive file is placed on /var/vcap/stemcell_base.tar.gz by default. You can change the path and other behaviour by the giving command line options shown by the '--help' option.
+The generated archive file is placed on /var/vcap/stemcell_base.tar.gz by default. You can change the path and other behavior by the giving command line options shown by the '--help' option.
 
 ### init
 
