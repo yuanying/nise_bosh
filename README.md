@@ -7,23 +7,15 @@
 
 Nise BOSH is a lightweight BOSH emulator. You can easily install multiple BOSH packages on your servers by Nise BOSH commands. 'Nise' means 'Pseudo' in Japanese.
 
-## Links
+## QUick Links
 
-* [Cloud Foundry v2 Devbox manifest and installer script for Nise BOSH v2](https://gist.github.com/yudai/5553213)
+* [Cloud Foundry v2 installer with Nise BOSH](https://github.com/yudai/cf_nise_installer)
+  * One liner CF installer for both local machines and Vagrant
 * [Nise BOSH Vagrant](https://github.com/BrianMMcClain/nise-bosh-vagrant) 
- * Vagrant integration by BrianMMcClain. See also: "[Introducing Nise-bosh-vagrant](http://catdevrandom.me/blog/2013/05/21/introducing-nise-bosh-vagrant/)"
-
-
+  * Vagrant integration by BrianMMcClain. See also: "[Introducing Nise-bosh-vagrant](http://catdevrandom.me/blog/2013/05/21/introducing-nise-bosh-vagrant/)"
 * [Step by Step Guide on Cloud Foundry Blog (v1)](http://blog.cloudfoundry.com/2013/04/15/ntt-contributes-nise-bosh-a-tool-to-speed-up-bosh-development/)
 * [Architecture Guide (v1)](http://www.slideshare.net/i_yudai/nise-bosh-in-action)
 
-### Other resources
-
-* [BOSH](https://github.com/cloudfoundry/bosh)
- * The original tool chain
- * Recommended when IaaS support is available
-* [cf-vagrant-installer](https://github.com/Altoros/cf-vagrant-installer)
- * Vagrant installer for Cloud Foundry v2
 
 ## Requirements
 
@@ -34,7 +26,7 @@ Nise BOSH is a lightweight BOSH emulator. You can easily install multiple BOSH p
 
 ## How to use
 
-(You can also find a sample manifest file and shell commands at "[Cloud Foundry Devbox manifest and installer script for Nise BOSH v2](https://gist.github.com/yudai/5553213)")
+("[Cloud Foundry v2 installer with Nise BOSH](https://github.com/yudai/cf_nise_installer)" is available for Cloud Foundry users)
 
 ### Install required gems
 
@@ -196,8 +188,26 @@ You can download objects from the blobstore for cf-release by using the 'bget' c
 
     ./bin/bget -o <output_file_name> <object_id>
 
+## Known incompatibility
+
+Nise BOSH has some kwon incompatibility with BOSH.
+
+* File permissions
+  * Nise BOSH does not harden the file permisison of the files such as /dev/shm/, /var/lock, /data/vcap/data, /data/vcap/store, and /tmp.
+    * Performed by [bosh_agent](https://github.com/cloudfoundry/bosh/blob/master/bosh_agent/lib/bosh_agent/bootstrap.rb)
+* Packaging-time dependencies
+  * Nise BOSH keeps packaging-time depended packages (listed in the spec of packages) after installation
+
 ## License
 
 Apache License Version 2.0
 
 The original BOSH is developed by VMware, inc. and distributed under Apache License Version 2.0.
+
+## Other resources
+
+* [BOSH](https://github.com/cloudfoundry/bosh)
+ * The original tool chain
+ * Recommended when IaaS support is available
+* [cf-vagrant-installer](https://github.com/Altoros/cf-vagrant-installer)
+ * Vagrant installer for Cloud Foundry v2
